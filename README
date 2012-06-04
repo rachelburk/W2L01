@@ -3,7 +3,7 @@
 #MovieData.rb
 #Takes in information from a data file called u.data stores the information and finds most popular movies
 #and which movie is most similar to user 1 
-#problem finding least popular movies. dont know why
+#problem finding least popular movies. dont know why it doesnt work 
 
 class MovieData
   attr_reader :allData, :orderPop, :userData
@@ -81,7 +81,11 @@ class MovieData
       @orderPop[movie] = popularity(movie)
       movie = movie+1 
     end 
-    @orderPop.sort_by {|k, v| v}
+    #sorts array by how many times a movie has been seen 
+    @orderPop=Hash[@orderPop.sort_by{|k, v| -v}]
+    
+    puts @orderPop
+    @orderPop.keys
   end
 
 
@@ -153,17 +157,17 @@ end
 #TEST*****
 movieInfo = MovieData.new
 movieInfo.loadData
-movieInfo.popularityList
-puts movieInfo.orderPop.length
+ordered = movieInfo.popularityList
 puts "The top 10 most and least popular movies are: "
-for x in (1..1682) do 
+for x in (0..1681) do 
   if x<11
-    puts "#{x}. #{movieInfo.orderPop[x]}"
+    puts "#{x+1}. #{ordered[x]}"
     x = x+1
   end
   if x>1672
-    puts "#{x}. #{movieInfo.orderPop[x]}"
+    puts "#{x+1}. #{ordered[x]}"
   end 
   
 end 
 movieInfo.mostSimilar(1)
+
