@@ -83,8 +83,7 @@ class MovieData
     end 
     #sorts array by how many times a movie has been seen 
     @orderPop=Hash[@orderPop.sort_by{|k, v| -v}]
-    
-    puts @orderPop
+
     @orderPop.keys
   end
 
