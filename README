@@ -144,7 +144,7 @@ class MovieData
       end
       count = count+1 
     end 
-    puts "Most simmilar to user #{x} is user #{bestUser} with a similarity of #{bestPrct}%"
+    puts "Most similar to user #{x} is user #{bestUser} with a similarity of #{bestPrct}%"
   end 
   
   
