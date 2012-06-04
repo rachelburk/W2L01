@@ -1,0 +1,181 @@
+#Rachel Burkhoff
+#6/3/12
+#MovieData.rb
+#Takes in information from a data file called u.data stores the information and finds most popular movies
+#and which movie is most similar to user 1 
+#Problem: line 92, program cant find index of specific values (dorting popularity) 
+
+
+class MovieData
+  attr_reader :allData, :orderPop, :userData
+  #reads in the data from the original m;-100k files and stores them in 
+  #whichever way it needs to be stored 
+  def loadData 
+    STDOUT.flush 
+    data = File.open("u.data", "r") 
+    
+    count = 0 #counter for number of reviews 
+    dataList = Array.new #array holding list of arrays (holding data of each review) 
+   
+    #goes through each line of data and creates an array storing all of the information and stores it in dataList
+    data.each_line do |x|
+      x = x.split
+      dataList[count] = [x[0].to_i, x[1].to_i, x[2].to_i]
+      count = count+1
+    end 
+    @allData = dataList 
+    
+    #order data based on users and what movies theyve seen 
+    @userData = Array.new(1682)
+    count = 1
+    1682.times do
+      x =0
+      person = Array.new 
+      
+      100000.times do    
+        if @allData[x][0].to_i == count
+          person.push(@allData[x][1]) 
+        end 
+        x = x+1
+      end 
+      
+      @userData [count-1] = person
+      count = count+1 
+    end 
+  end
+
+  #returns a number that indicates the popularity (higher numbers are more popular)
+  def popularity (movieId)
+    rates = Array.new 
+    pop = Hash.new 
+    people = 0
+    
+    #finding all of the movie ratings from list of data and storing info 
+    @allData.each do |x|
+      if movieId == x[1]
+        rates[people] = [x[2]]
+        people = people +1 
+      end 
+    end 
+    
+    #gets average 
+    avg =0
+    rates.each do |x|
+      avg = avg + x[0]
+    end
+    
+    if people != 0 
+      avg = avg/people  #avg number rating using amount of people 
+    end 
+    
+    pop = [people, avg] 
+    return people
+  end
+
+  #generates a list of all movie_id's ordered by decreasing popularity 
+  def popularityList
+    popMovies = Array.new
+    movie = 1 
+    
+    #gets popularity for each movie and adds to list ********* MUST CHANGE THE AMOUNT movie is incremented ***********
+    1682.times do
+      popMovies[movie-1] = [movie, popularity(movie)]
+      movie = movie+1 
+    end 
+
+    @orderPop = Array.new 
+    #finding the key of the largest value in the hash (number of most people who watched a movie)
+    maxPeople = (popMovies.max)[0]
+   
+    #working down from most amount of people who have seen a movie to the least seen movie getting
+    #DOESN'T WORK!! I DONT KNOW WHY 
+    while maxPeople>0 do
+      movies = Array.new
+      @orderPop.push((popMovies.index(maxPeople).to_i)+1)
+      maxPeople= maxPeople-1
+    end 
+  end
+
+
+   #generates a number which indicates the similarity in movie preference 
+  #between user1 and user2 (where higher numbers indicate greater similarity)
+  def similarity (x, y)
+  
+    xArray = Array.new 
+    yArray = Array.new 
+     
+    #adds which movies each user has seen into seperate arrays 
+    count = 0 
+    @userData[x-1].each do 
+      xArray.push(@userData[x-1][count])
+      count= count+1
+    end 
+    count = 0
+     @userData[y-1].each do 
+      yArray.push(@userData[y-1][count])
+      count= count+1
+    end 
+
+    similar =0.0
+    xArray.each do |xReview|
+      yArray.each do |yReview|
+        #if they saw the same movie then add a counter 
+        if xReview == yReview 
+          similar = similar +1.0
+        end 
+      end 
+    end 
+    
+    #determine similarity based on how many of the same movies they've both watched
+    #gets the percentage of how many movies for each person and then averages it between the tow percentages
+    prct = 0
+    if similar!= 0 
+      prct = ((((similar/ xArray.length) + (similar/ yArray.length) )/ 2.0)*100).round(2)
+    end 
+    return prct
+  end 
+  
+  #returns a list of users whose tastes are most similar to the tastes of user u 
+  def mostSimilar (x)
+    count = 0
+    bestPrct = 0.0
+    bestUser = 0
+    prct = 0.0
+    comparedYet = Array.new 
+    @allData.each do 
+      #compare every user to x
+      if (x != @allData[count][0]) & !(comparedYet.include? (@allData[count][0]))
+        comparedYet.push(@allData[count][0])
+        prct = similarity(x, @allData[count][0])
+        #if has bigger percentage change most simmilar to the current user 
+        if prct > bestPrct 
+          bestPrct = prct
+          bestUser = @allData[count][0]
+        end 
+        
+      end
+      count = count+1 
+    end 
+    puts "Most simmilar to user #{x} is #{bestUser} with a similarity of #{bestPrct}%"
+  end 
+  
+  
+end 
+
+#TEST*****
+movieInfo = MoviesData.new
+movieInfo.loadData
+movieInfo.popularityList
+puts "The top 10 most popular movies are: "
+for x in (0..9) do 
+  puts "#{x+1}. #{movieInfo.orderPop[x]}"
+  x = x+1
+end
+puts "The top 10 least popular movies are: "
+y=1
+for x in (1681...1672) do 
+  puts "#{y}. #{movieInfo.orderPop[x]}"
+  x = x-1
+  y = y+1
+end
+movieInfo.mostSimilar(1)
