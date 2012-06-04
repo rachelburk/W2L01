@@ -3,8 +3,7 @@
 #MovieData.rb
 #Takes in information from a data file called u.data stores the information and finds most popular movies
 #and which movie is most similar to user 1 
-#Problem: line 92, program cant find index of specific values (dorting popularity) 
-
+#problem finding least popular movies. dont know why
 
 class MovieData
   attr_reader :allData, :orderPop, :userData
@@ -12,7 +11,7 @@ class MovieData
   #whichever way it needs to be stored 
   def loadData 
     STDOUT.flush 
-    data = File.open("u.data", "r") 
+    data = File.open("uReal.data", "r") 
     
     count = 0 #counter for number of reviews 
     dataList = Array.new #array holding list of arrays (holding data of each review) 
@@ -47,7 +46,7 @@ class MovieData
   #returns a number that indicates the popularity (higher numbers are more popular)
   def popularity (movieId)
     rates = Array.new 
-    pop = Hash.new 
+    pop = Array.new 
     people = 0
     
     #finding all of the movie ratings from list of data and storing info 
@@ -74,26 +73,15 @@ class MovieData
 
   #generates a list of all movie_id's ordered by decreasing popularity 
   def popularityList
-    popMovies = Array.new
+    @orderPop= Hash.new
     movie = 1 
     
     #gets popularity for each movie and adds to list ********* MUST CHANGE THE AMOUNT movie is incremented ***********
     1682.times do
-      popMovies[movie-1] = [movie, popularity(movie)]
+      @orderPop[movie] = popularity(movie)
       movie = movie+1 
     end 
-
-    @orderPop = Array.new 
-    #finding the key of the largest value in the hash (number of most people who watched a movie)
-    maxPeople = (popMovies.max)[0]
-   
-    #working down from most amount of people who have seen a movie to the least seen movie getting
-    #DOESN'T WORK!! I DONT KNOW WHY 
-    while maxPeople>0 do
-      movies = Array.new
-      @orderPop.push((popMovies.index(maxPeople).to_i)+1)
-      maxPeople= maxPeople-1
-    end 
+    @orderPop.sort_by {|k, v| v}
   end
 
 
@@ -156,26 +144,26 @@ class MovieData
       end
       count = count+1 
     end 
-    puts "Most simmilar to user #{x} is #{bestUser} with a similarity of #{bestPrct}%"
+    puts "Most simmilar to user #{x} is user #{bestUser} with a similarity of #{bestPrct}%"
   end 
   
   
 end 
 
 #TEST*****
-movieInfo = MoviesData.new
+movieInfo = MovieData.new
 movieInfo.loadData
 movieInfo.popularityList
-puts "The top 10 most popular movies are: "
-for x in (0..9) do 
-  puts "#{x+1}. #{movieInfo.orderPop[x]}"
-  x = x+1
-end
-puts "The top 10 least popular movies are: "
-y=1
-for x in (1681...1672) do 
-  puts "#{y}. #{movieInfo.orderPop[x]}"
-  x = x-1
-  y = y+1
-end
+puts movieInfo.orderPop.length
+puts "The top 10 most and least popular movies are: "
+for x in (1..1682) do 
+  if x<11
+    puts "#{x}. #{movieInfo.orderPop[x]}"
+    x = x+1
+  end
+  if x>1672
+    puts "#{x}. #{movieInfo.orderPop[x]}"
+  end 
+  
+end 
 movieInfo.mostSimilar(1)
